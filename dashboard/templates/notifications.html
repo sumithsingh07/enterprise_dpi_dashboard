@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Notifications</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f5f5f5;
+    margin:30px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-left:6px solid red;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+.time{
+    color:gray;
+    font-size:13px;
+}
+
+.high{
+    border-left-color:#ff0000;
+}
+
+.medium{
+    border-left-color:#ff9800;
+}
+
+.low{
+    border-left-color:#4CAF50;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Live Security Notifications</h2>
+
+{% for alert in alerts %}
+
+<div class="card {{ alert.severity|lower }}">
+
+<b>{{ alert.alert_type }}</b>
+
+<p>{{ alert.description }}</p>
+
+<p>{{ alert.source_ip }} → {{ alert.destination_ip }}</p>
+
+<div class="time">
+
+{{ alert.time }}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+<script>
+
+setInterval(function(){
+
+location.reload();
+
+},5000);
+
+</script>
+
+</body>
+
+</html>

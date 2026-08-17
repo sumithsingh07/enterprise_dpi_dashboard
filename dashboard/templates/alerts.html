@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Enterprise IDS Alerts</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    background:#1e1e2f;
+    color:white;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+h2{
+    color:#ff4d4d;
+    margin-bottom:20px;
+}
+
+a{
+    text-decoration:none;
+}
+
+.button{
+    background:#2196F3;
+    color:white;
+    padding:10px 20px;
+    border-radius:6px;
+    display:inline-block;
+    margin-bottom:20px;
+}
+
+.button:hover{
+    background:#1976D2;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+    background:#2b2b3c;
+}
+
+th{
+    background:#ff4d4d;
+    color:white;
+    padding:12px;
+}
+
+td{
+    padding:10px;
+    border-bottom:1px solid #444;
+    text-align:center;
+}
+
+tr:nth-child(even){
+    background:#333347;
+}
+
+tr:hover{
+    background:#40405a;
+}
+
+.low{
+    color:lightgreen;
+    font-weight:bold;
+}
+
+.medium{
+    color:gold;
+    font-weight:bold;
+}
+
+.high{
+    color:orange;
+    font-weight:bold;
+}
+
+.critical{
+    color:red;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>🚨 Enterprise IDS Alerts</h2>
+
+<a href="/" class="button">
+🏠 Back to Dashboard
+</a>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Timestamp</th>
+<th>Severity</th>
+<th>Alert Type</th>
+<th>Signature</th>
+<th>Source IP</th>
+<th>Destination IP</th>
+<th>Protocol</th>
+<th>Description</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for alert in alerts %}
+
+<tr>
+
+<td>{{ alert.id }}</td>
+
+<td>{{ alert.timestamp }}</td>
+
+<td>
+
+{% if alert.severity=="CRITICAL" %}
+
+<span class="critical">
+{{ alert.severity }}
+</span>
+
+{% elif alert.severity=="HIGH" %}
+
+<span class="high">
+{{ alert.severity }}
+</span>
+
+{% elif alert.severity=="MEDIUM" %}
+
+<span class="medium">
+{{ alert.severity }}
+</span>
+
+{% else %}
+
+<span class="low">
+{{ alert.severity }}
+</span>
+
+{% endif %}
+
+</td>
+
+<td>{{ alert.alert_type }}</td>
+
+<td>{{ alert.signature }}</td>
+
+<td>{{ alert.src_ip }}</td>
+
+<td>{{ alert.dst_ip }}</td>
+
+<td>{{ alert.protocol }}</td>
+
+<td>{{ alert.description }}</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="9">
+
+No IDS alerts found.
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+
+const socket = io();
+
+socket.on("connect", function(){
+    console.log("Connected to SocketIO");
+});
+
+socket.on("new_alert", function(alert){
+
+    alert("🚨 New IDS Alert!\n\n"
+        + "Severity: " + alert.severity
+        + "\nSignature: " + alert.signature
+        + "\nDescription: " + alert.description);
+
+    location.reload();
+
+});
+
+</script>
+</body>
+
+</html>

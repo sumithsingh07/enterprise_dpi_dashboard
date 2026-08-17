@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Enterprise DPI Dashboard</title>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: #eef2f7;
+    color: #111827;
+}
+
+body.dark {
+    background: #111827;
+    color: #f9fafb;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    background: #111827;
+    color: white;
+    padding: 25px 18px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.sidebar h2 {
+    text-align: center;
+    color: #4fc3f7;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 14px 12px;
+    margin: 5px 0;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.sidebar a:hover {
+    background: #1f2937;
+}
+
+.main {
+    margin-left: 250px;
+    padding: 28px;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    font-size: 32px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+button,
+.btn {
+    border: none;
+    background: #1976d2;
+    color: white;
+    padding: 11px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover,
+.btn:hover {
+    background: #125ca3;
+}
+
+.panel {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+}
+
+.dark .panel {
+    background: #1f2937;
+    color: white;
+}
+
+.panel h2,
+.panel h3 {
+    margin-bottom: 15px;
+}
+
+.upload-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.upload-row input[type="file"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    background: white;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.kpi {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+    border-left: 6px solid #1976d2;
+}
+
+.dark .kpi {
+    background: #1f2937;
+}
+
+.kpi.green { border-left-color: #22c55e; }
+.kpi.orange { border-left-color: #f59e0b; }
+.kpi.red { border-left-color: #ef4444; }
+
+.kpi-title {
+    color: #6b7280;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.dark .kpi-title {
+    color: #cbd5e1;
+}
+
+.kpi-value {
+    margin-top: 8px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1565c0;
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.chart-box {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+    min-width: 0;
+}
+
+.dark .chart-box {
+    background: #1f2937;
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+}
+
+#geoipMap {
+    height: 500px;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.search-box {
+    width: 350px;
+    max-width: 100%;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    margin-bottom: 15px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+th {
+    background: #1565c0;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+    background: #f5f7fa;
+}
+
+.dark tr:hover {
+    background: #374151;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+}
+
+.pagination button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: #e5e7eb;
+    color: #111827;
+    font-size: 12px;
+}
+
+.footer {
+    text-align: center;
+    padding: 25px;
+    color: #6b7280;
+}
+
+.status {
+    margin-top: 8px;
+    color: #16a34a;
+    font-size: 14px;
+}
+
+@media (max-width: 1200px) {
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 850px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>DPI SOC</h2>
+
+    <a href="#dashboard">🏠 Dashboard</a>
+    <a href="#traffic">🌐 Live Traffic</a>
+    <a href="#tls">🔒 TLS</a>
+    <a href="#dns">📡 DNS</a>
+    <a href="#threat">🛡 Threat Intelligence</a>
+    <a href="#geoip">🌍 GeoIP Map</a>
+    <a href="#reports">📊 Reports</a>
+    <a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main" id="dashboard">
+
+    <div class="header">
+        <div>
+            <h1>Enterprise DPI Dashboard</h1>
+            <p>
+                Welcome
+                <b>{{ session.username }}</b>
+                ({{ session.role }})
+            </p>
+        </div>
+
+        <div class="header-buttons">
+            <button onclick="loadDashboard()">🔄 Refresh</button>
+            <button onclick="toggleTheme()">🌙 Theme</button>
+        </div>
+    </div>
+
+    <div
+        id="dashboardError"
+        style="
+            display:none;
+            background:#fee2e2;
+            color:#991b1b;
+            border:1px solid #fecaca;
+            padding:12px 15px;
+            border-radius:8px;
+            margin-bottom:20px;
+        "
+    ></div>
+
+    <div class="panel">
+        <h2>📂 Upload PCAP File</h2>
+
+        <form
+            action="/upload"
+            method="POST"
+            enctype="multipart/form-data"
+        >
+            <div class="upload-row">
+
+                <input
+                    type="file"
+                    name="pcap"
+                    accept=".pcap,.pcapng"
+                    required
+                >
+
+                <button type="submit">
+                    🚀 Analyze PCAP
+                </button>
+
+            </div>
+        </form>
+
+        <div class="status">
+            Database: dpi_database.db
+        </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="cards">
+
+        <div class="kpi">
+            <div class="kpi-title">Total Packets</div>
+            <div class="kpi-value" id="totalPackets">
+                {{ total_packets }}
+            </div>
+        </div>
+
+        <div class="kpi green">
+            <div class="kpi-title">Total Hosts</div>
+            <div class="kpi-value" id="totalHosts">
+                {{ total_hosts }}
+            </div>
+        </div>
+
+        <div class="kpi orange" id="tls">
+            <div class="kpi-title">TLS Packets</div>
+            <div class="kpi-value" id="tlsPackets">
+                {{ tls_packets }}
+            </div>
+        </div>
+
+        <div class="kpi red" id="dns">
+            <div class="kpi-title">DNS Packets</div>
+            <div class="kpi-value" id="dnsPackets">
+                {{ dns_packets }}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TRAFFIC / PROTOCOL / APPLICATION -->
+    <div class="chart-grid" id="traffic">
+
+        <div class="chart-box">
+            <h2>📈 Traffic Volume</h2>
+            <div class="chart-container">
+                <canvas id="trafficChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <h2>📊 Protocol Distribution</h2>
+            <div class="chart-container">
+                <canvas id="protocolChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <h2>📱 Application Distribution</h2>
+            <div class="chart-container">
+                <canvas id="appChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-box" id="threat">
+            <h2>🛡 Threat Distribution</h2>
+            <div class="chart-container">
+                <canvas id="threatChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GEOIP MAP -->
+    <div class="panel" id="geoip">
+        <h2>🌍 GeoIP Attack Map</h2>
+        <div id="geoipMap"></div>
+    </div>
+
+    <!-- TOP ATTACKERS -->
+    <div class="panel">
+        <h2>🔥 Top Attackers</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>Packets</th>
+                    </tr>
+                </thead>
+
+                <tbody id="attackerBody">
+                    {% for row in top_attackers %}
+                    <tr>
+                        <td>{{ row.src_ip }}</td>
+                        <td>{{ row.total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MACHINE LEARNING -->
+    <div class="panel">
+        <h2>🤖 Machine Learning Anomalies</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Destination</th>
+                        <th>Risk</th>
+                    </tr>
+                </thead>
+
+                <tbody id="anomalyBody">
+                    {% if anomalies %}
+                        {% for row in anomalies %}
+                        <tr>
+                            <td>{{ row.src_ip }}</td>
+                            <td>{{ row.dst_ip }}</td>
+                            <td>
+                                <span class="badge">
+                                    {{ row.reputation }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                No anomalies detected.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LIVE TRAFFIC -->
+    <div class="panel" id="trafficTableSection">
+        <h2>🔭 Live Traffic</h2>
+
+        <input
+            id="trafficSearch"
+            class="search-box"
+            type="text"
+            placeholder="Search IP, protocol, application..."
+            oninput="filterTraffic()"
+        >
+
+        <div class="table-wrap">
+            <table id="liveTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Source</th>
+                        <th>Destination</th>
+                        <th>Protocol</th>
+                        <th>Application</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="liveTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button
+                id="prevBtn"
+                onclick="previousPage()"
+            >
+                ◀ Previous
+            </button>
+
+            <span id="pageInfo">
+                Page 1 of 1
+            </span>
+
+            <button
+                id="nextBtn"
+                onclick="nextPage()"
+            >
+                Next ▶
+            </button>
+        </div>
+    </div>
+
+    <!-- APPLICATION TABLE -->
+    <div class="chart-grid">
+
+        <div class="panel">
+            <h2>📱 Top Applications</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Application</th>
+                            <th>Packets</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in top_apps %}
+                        <tr>
+                            <td>{{ row.application }}</td>
+                            <td>{{ row.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>🌐 Top Countries</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>Packets</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in top_countries %}
+                        <tr>
+                            <td>{{ row.country }}</td>
+                            <td>{{ row.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="reports">
+        <h2>📊 Reports</h2>
+
+        <div class="upload-row">
+            <a class="btn" href="/export/csv">
+                📄 Export CSV
+            </a>
+
+            <a class="btn" href="/export/excel">
+                📊 Export Excel
+            </a>
+
+            <a class="btn" href="/export/json">
+                🧾 Export JSON
+            </a>
+
+            <a class="btn" href="/export/pdf">
+                📕 Export PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">
+        Enterprise DPI Security Operations Center<br>
+        Powered by Python • Flask • SQLite • Chart.js • Leaflet
+    </div>
+
+</div>
+
+<script>
+let trafficData = [];
+let filteredTraffic = [];
+let currentPage = 1;
+const rowsPerPage = 25;
+
+let trafficChart = null;
+let protocolChart = null;
+let appChart = null;
+let threatChart = null;
+let geoipMap = null;
+
+
+function safeNumber(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+}
+
+
+function escapeHTML(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function updateText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.textContent = value ?? 0;
+    }
+}
+
+
+function chartOptions() {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false
+    };
+}
+
+
+function destroyChart(chart) {
+    if (chart) {
+        chart.destroy();
+    }
+    return null;
+}
+
+
+function createCharts(data) {
+
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js could not be loaded.");
+        return;
+    }
+
+    trafficChart = destroyChart(trafficChart);
+    protocolChart = destroyChart(protocolChart);
+    appChart = destroyChart(appChart);
+    threatChart = destroyChart(threatChart);
+
+    const trafficCanvas = document.getElementById("trafficChart");
+    const protocolCanvas = document.getElementById("protocolChart");
+    const appCanvas = document.getElementById("appChart");
+    const threatCanvas = document.getElementById("threatChart");
+
+    if (!trafficCanvas || !protocolCanvas || !appCanvas || !threatCanvas) {
+        return;
+    }
+
+    const trafficLabels = Array.isArray(data.traffic_labels)
+        ? data.traffic_labels
+        : [];
+
+    const trafficValues = Array.isArray(data.traffic_values)
+        ? data.traffic_values.map(safeNumber)
+        : [];
+
+    trafficChart = new Chart(trafficCanvas, {
+        type: "line",
+        data: {
+            labels: trafficLabels,
+            datasets: [{
+                label: "Flows",
+                data: trafficValues,
+                tension: 0.25,
+                fill: true
+            }]
+        },
+        options: chartOptions()
+    });
+
+    const protocolStats = Array.isArray(data.protocol_stats)
+        ? data.protocol_stats
+        : [];
+
+    protocolChart = new Chart(protocolCanvas, {
+        type: "doughnut",
+        data: {
+            labels: protocolStats.map(
+                row => String(row.protocol ?? "UNKNOWN")
+            ),
+            datasets: [{
+                label: "Packets",
+                data: protocolStats.map(
+                    row => safeNumber(row.total)
+                )
+            }]
+        },
+        options: chartOptions()
+    });
+
+    const appStats = Array.isArray(data.top_apps)
+        ? data.top_apps
+        : [];
+
+    appChart = new Chart(appCanvas, {
+        type: "bar",
+        data: {
+            labels: appStats.map(
+                row => String(row.application ?? "Unknown")
+            ),
+            datasets: [{
+                label: "Packets",
+                data: appStats.map(
+                    row => safeNumber(row.total)
+                )
+            }]
+        },
+        options: {
+            ...chartOptions(),
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    const malicious = safeNumber(data.malware_count);
+    const blocked = safeNumber(data.blocked_packets);
+    const total = safeNumber(data.total_packets);
+    const normal = Math.max(total - malicious - blocked, 0);
+
+    threatChart = new Chart(threatCanvas, {
+        type: "doughnut",
+        data: {
+            labels: ["Normal", "Blocked", "Malicious"],
+            datasets: [{
+                data: [normal, blocked, malicious]
+            }]
+        },
+        options: chartOptions()
+    });
+}
+
+
+function initializeMap(locations) {
+
+    const mapElement = document.getElementById("geoipMap");
+
+    if (!mapElement || typeof L === "undefined") {
+        console.error("Leaflet/map element is unavailable.");
+        return;
+    }
+
+    if (geoipMap) {
+        geoipMap.remove();
+        geoipMap = null;
+    }
+
+    geoipMap = L.map("geoipMap", {
+        worldCopyJump: true
+    }).setView([20.5937, 78.9629], 5);
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 18,
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(geoipMap);
+
+    const validLocations = Array.isArray(locations)
+        ? locations
+        : [];
+
+    const markerPoints = [];
+
+    validLocations.forEach(function(item) {
+        const lat = Number(item.lat);
+        const lon = Number(item.lon);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            return;
+        }
+
+        const marker = L.marker([lat, lon]).addTo(geoipMap);
+
+        marker.bindPopup(
+            "<b>" + escapeHTML(item.country || "Unknown") +
+            "</b><br>" +
+            escapeHTML(item.city || "Unknown") +
+            "<br>" +
+            escapeHTML(item.ip || "Unknown")
+        );
+
+        markerPoints.push([lat, lon]);
+    });
+
+    if (markerPoints.length > 1) {
+        geoipMap.fitBounds(markerPoints, {
+            padding: [30, 30]
+        });
+    }
+
+    setTimeout(function() {
+        if (geoipMap) {
+            geoipMap.invalidateSize();
+        }
+    }, 300);
+}
+
+
+async function loadDashboard() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/dashboard",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+            throw new Error(
+                "Dashboard API returned HTTP " +
+                response.status
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        updateText(
+            "totalPackets",
+            safeNumber(data.total_packets)
+                .toLocaleString()
+        );
+
+        updateText(
+            "totalHosts",
+            safeNumber(data.total_hosts)
+                .toLocaleString()
+        );
+
+        updateText(
+            "tlsPackets",
+            safeNumber(data.tls_packets)
+                .toLocaleString()
+        );
+
+        updateText(
+            "dnsPackets",
+            safeNumber(data.dns_packets)
+                .toLocaleString()
+        );
+
+
+        createCharts(data);
+
+
+        const flowResponse =
+            await fetch(
+                "/live_data",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!flowResponse.ok) {
+            throw new Error(
+                "Live traffic API returned HTTP " +
+                flowResponse.status
+            );
+        }
+
+
+        trafficData =
+            await flowResponse.json();
+
+
+        if (!Array.isArray(trafficData)) {
+            trafficData = [];
+        }
+
+
+        filteredTraffic =
+            trafficData.slice();
+
+
+        currentPage = 1;
+
+        displayTraffic();
+
+
+        // The map is initialized once on page load from
+        // the locations rendered by Flask.
+    } catch (error) {
+
+        console.error("Dashboard loading error:", error);
+
+        const banner = document.getElementById("dashboardError");
+
+        if (banner) {
+            banner.textContent =
+                "Dashboard data could not be refreshed. Check that Flask is running at http://127.0.0.1:5000/";
+            banner.style.display = "block";
+        }
+    }
+}
+
+
+function displayTraffic() {
+
+    const tbody =
+        document.getElementById(
+            "liveTableBody"
+        );
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    const start =
+        (currentPage - 1)
+        * rowsPerPage;
+
+
+    const pageRows =
+        filteredTraffic.slice(
+            start,
+            start + rowsPerPage
+        );
+
+
+    if (pageRows.length === 0) {
+
+        tbody.innerHTML =
+            `
+            <tr>
+                <td colspan="6">
+                    No network flows found.
+                </td>
+            </tr>
+            `;
+
+        updatePagination();
+
+        return;
+    }
+
+
+    pageRows.forEach(
+        function(row) {
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML =
+                `
+                <td>${escapeHTML(row.id)}</td>
+                <td>${escapeHTML(row.src_ip)}</td>
+                <td>${escapeHTML(row.dst_ip)}</td>
+                <td>${escapeHTML(row.protocol)}</td>
+                <td>${escapeHTML(row.application)}</td>
+                <td>${escapeHTML(row.action)}</td>
+                `;
+
+
+            tbody.appendChild(tr);
+        }
+    );
+
+
+    updatePagination();
+}
+
+
+function updatePagination() {
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredTraffic.length
+                / rowsPerPage
+            )
+        );
+
+
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+
+
+    const pageInfo =
+        document.getElementById(
+            "pageInfo"
+        );
+
+
+    if (pageInfo) {
+        pageInfo.textContent =
+            "Page " +
+            currentPage +
+            " of " +
+            totalPages;
+    }
+
+
+    const prev =
+        document.getElementById(
+            "prevBtn"
+        );
+
+
+    const next =
+        document.getElementById(
+            "nextBtn"
+        );
+
+
+    if (prev) {
+        prev.disabled =
+            currentPage <= 1;
+    }
+
+
+    if (next) {
+        next.disabled =
+            currentPage >= totalPages;
+    }
+}
+
+
+function nextPage() {
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredTraffic.length
+                / rowsPerPage
+            )
+        );
+
+
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayTraffic();
+    }
+}
+
+
+function previousPage() {
+
+    if (currentPage > 1) {
+        currentPage--;
+        displayTraffic();
+    }
+}
+
+
+function filterTraffic() {
+
+    const input =
+        document.getElementById(
+            "trafficSearch"
+        );
+
+
+    const search =
+        String(
+            input?.value || ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    if (!search) {
+
+        filteredTraffic =
+            trafficData.slice();
+
+    } else {
+
+        filteredTraffic =
+            trafficData.filter(
+                function(row) {
+
+                    const text =
+                        [
+                            row.id,
+                            row.src_ip,
+                            row.dst_ip,
+                            row.protocol,
+                            row.application,
+                            row.action
+                        ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    return text.includes(
+                        search
+                    );
+                }
+            );
+    }
+
+
+    currentPage = 1;
+
+    displayTraffic();
+}
+
+
+function toggleTheme() {
+    document.body.classList.toggle(
+        "dark"
+    );
+}
+
+
+/*
+   GeoIP locations are inserted directly by Flask.
+   This avoids needing a dashboard.js file.
+*/
+window.DPI_LOCATIONS =
+    {{ locations|default([], true)|tojson }};
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        initializeMap(
+            window.DPI_LOCATIONS || []
+        );
+
+        loadDashboard();
+
+        setInterval(
+            loadDashboard,
+            5000
+        );
+
+    }
+);
+</script>
+
+</body>
+</html>

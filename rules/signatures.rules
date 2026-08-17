@@ -1,0 +1,43 @@
+# Signature|Severity|Description
+
+EICAR-STANDARD-ANTIVIRUS-TEST-FILE|LOW|EICAR Antivirus Test
+
+powershell|HIGH|PowerShell Execution
+
+Invoke-WebRequest|CRITICAL|PowerShell Download
+
+DownloadString|CRITICAL|PowerShell DownloadString
+
+FromBase64String|HIGH|Base64 Payload
+
+mimikatz|CRITICAL|Credential Dumper
+
+meterpreter|CRITICAL|Meterpreter Payload
+
+beacon|CRITICAL|Cobalt Strike Beacon
+
+cmd.exe|HIGH|Windows Command
+
+/bin/sh|CRITICAL|Linux Shell
+
+bash -i|CRITICAL|Reverse Shell
+
+nc -e|CRITICAL|Netcat Reverse Shell
+
+union select|HIGH|SQL Injection
+
+or 1=1|HIGH|SQL Injection
+
+drop table|CRITICAL|Database Destruction
+
+<script|HIGH|Cross Site Scripting
+
+javascript:|HIGH|JavaScript Injection
+
+../|MEDIUM|Directory Traversal
+
+..\\|MEDIUM|Windows Directory Traversal
+
+pastebin.com|MEDIUM|Pastebin Communication
+
+raw.githubusercontent.com|MEDIUM|GitHub Raw Download

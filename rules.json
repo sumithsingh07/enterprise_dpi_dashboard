@@ -1,0 +1,13 @@
+{
+    "default_action": "FORWARD",
+    "rules": {
+        "YOUTUBE": "DROP",
+        "FACEBOOK": "DROP",
+        "INSTAGRAM": "DROP",
+        "TIKTOK": "DROP",
+        "NETFLIX": "LOG_ONLY",
+        "GOOGLE": "FORWARD",
+        "GITHUB": "FORWARD",
+        "MICROSOFT": "FORWARD"
+    }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Admin Panel</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f4f4;
+padding:30px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid gray;
+padding:10px;
+}
+
+th{
+background:#1f2937;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Enterprise DPI Admin Panel</h1>
+
+<h3>Users</h3>
+
+<table>
+
+<tr>
+
+<th>ID</th>
+<th>Username</th>
+<th>Role</th>
+
+</tr>
+
+{% for user in users %}
+
+<tr>
+
+<td>{{user.id}}</td>
+<td>{{user.username}}</td>
+<td>{{user.role}}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<a href="/">← Back to Dashboard</a>
+
+</body>
+
+</html>
